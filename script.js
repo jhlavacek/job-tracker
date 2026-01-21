@@ -107,6 +107,14 @@ async function loadDataFromFile() {
         const data = await response.json();
         jobs = data.jobs || [];
         coaches = data.coaches || [];
+
+        // Load meeting notes into localStorage (for view mode display)
+        if (data.meetingNotes) {
+            Object.entries(data.meetingNotes).forEach(([coachId, notes]) => {
+                localStorage.setItem(`meetingNotes_${coachId}`, notes);
+            });
+        }
+
         renderAll();
     } catch (error) {
         console.error('Failed to load data.json:', error);
@@ -1770,7 +1778,16 @@ function confirmClearAll() {
  * Exports all data as a JSON file download.
  */
 function exportData() {
-    const data = JSON.stringify({ jobs, coaches }, null, 2);
+    // Collect meeting notes for all coaches
+    const meetingNotes = {};
+    coaches.forEach(coach => {
+        const notes = localStorage.getItem(`meetingNotes_${coach.id}`);
+        if (notes) {
+            meetingNotes[coach.id] = notes;
+        }
+    });
+
+    const data = JSON.stringify({ jobs, coaches, meetingNotes }, null, 2);
     const blob = new Blob([data], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
