@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Tracker - Goal: April 30th</title>
+    <meta name="description" content="Track your job applications, interviews, and career coaching with this dark-mode job tracker.">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Goal Banner -->
+    <div class="goal-banner">
+        <div class="goal-content">
+            <div class="goal-info">
+                <div class="countdown">
+                    <div class="countdown-number" id="daysLeft" aria-live="polite">--</div>
+                    <div class="countdown-label">Days Left</div>
+                </div>
+                <div class="goal-text">
+                    <strong>Goal: Job by April 30th</strong><br>
+                    Stay focused. Every application counts.
+                </div>
+            </div>
+            <div class="progress-container">
+                <div class="progress-label">
+                    <span>Pipeline Progress</span>
+                    <span id="progressPercent">0%</span>
+                </div>
+                <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <h1>Job Tracker</h1>
+        <div class="header-actions">
+            <button class="btn btn-magic" onclick="openImportModal()">Smart Import</button>
+            <button class="btn btn-secondary btn-sm" onclick="exportData()">Export</button>
+            <button class="btn btn-secondary btn-sm" onclick="confirmClearAll()">Clear All</button>
+            <button class="btn btn-primary" id="mainAddBtn" onclick="openAddModal()">+ Add Job</button>
+        </div>
+    </header>
+
+    <!-- Tab Navigation -->
+    <nav class="tabs" role="tablist" aria-label="Main navigation">
+        <button class="tab-btn active" onclick="switchTab('jobs')" role="tab" aria-selected="true" aria-controls="tab-jobs">Job Applications</button>
+        <button class="tab-btn" onclick="switchTab('coach')" role="tab" aria-selected="false" aria-controls="tab-coach">Job Coach</button>
+    </nav>
+
+    <!-- Jobs Tab -->
+    <div class="tab-content active" id="tab-jobs" role="tabpanel" aria-labelledby="tab-jobs">
+        <!-- Statistics Dashboard -->
+        <section class="stats" id="stats" aria-label="Application statistics">
+            <div class="stat-card">
+                <div class="value" id="stat-total">0</div>
+                <div class="label">Total Apps</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="stat-applied">0</div>
+                <div class="label">Applied</div>
+            </div>
+            <div class="stat-card highlight">
+                <div class="value" id="stat-interviews">0</div>
+                <div class="label">Interviews</div>
+            </div>
+            <div class="stat-card success">
+                <div class="value" id="stat-offers">0</div>
+                <div class="label">Offers</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="stat-response">0%</div>
+                <div class="label">Response Rate</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="stat-weekly">0</div>
+                <div class="label">This Week</div>
+            </div>
+        </section>
+
+        <!-- This Week Section -->
+        <section class="this-week" id="thisWeekSection" aria-label="Upcoming events this week">
+            <h3>Coming Up This Week</h3>
+            <div class="week-items" id="weekItems">
+                <div class="empty-week">No interviews or meetings scheduled this week. Keep applying!</div>
+            </div>
+        </section>
+
+        <!-- Kanban Board - 5 Stage Pipeline -->
+        <!-- Stages: pipeline → applied → interview → final → offer -->
+        <main class="board" id="board" aria-label="Job application pipeline">
+            <div class="column pipeline" data-stage="pipeline">
+                <div class="column-header">
+                    <span class="column-title">Company Pipeline</span>
+                    <span class="column-count">0</span>
+                </div>
+                <div class="cards-container" data-stage="pipeline"></div>
+            </div>
+            <div class="column applied" data-stage="applied">
+                <div class="column-header">
+                    <span class="column-title">Applied</span>
+                    <span class="column-count">0</span>
+                </div>
+                <div class="cards-container" data-stage="applied"></div>
+            </div>
+            <div class="column interview" data-stage="interview">
+                <div class="column-header">
+                    <span class="column-title">Interview Set</span>
+                    <span class="column-count">0</span>
+                </div>
+                <div class="cards-container" data-stage="interview"></div>
+            </div>
+            <div class="column final" data-stage="final">
+                <div class="column-header">
+                    <span class="column-title">Final Round</span>
+                    <span class="column-count">0</span>
+                </div>
+                <div class="cards-container" data-stage="final"></div>
+            </div>
+            <div class="column offer" data-stage="offer">
+                <div class="column-header">
+                    <span class="column-title">Offer</span>
+                    <span class="column-count">0</span>
+                </div>
+                <div class="cards-container" data-stage="offer"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Job Coach Tab -->
+    <div class="tab-content" id="tab-coach" role="tabpanel" aria-labelledby="tab-coach">
+        <!-- Main Coach Grid View -->
+        <div class="coach-container" id="coachMainView">
+            <div class="coach-header">
+                <h2>Job Coach Candidates</h2>
+                <button class="btn btn-primary" onclick="openCoachModal()">+ Add Coach</button>
+            </div>
+            <div class="coach-grid" id="coachGrid"></div>
+            <div class="empty-state" id="coachEmptyState" style="display: none;">
+                <h3>No job coaches yet</h3>
+                <p>Add potential career coaches to compare and track.</p>
+            </div>
+        </div>
+
+        <!-- Meeting Notes Sub-View (hidden by default) -->
+        <!-- This view is shown when clicking "Meeting Notes" on a coach card -->
+        <!-- The coach ID is stored in data-coach-id attribute for persistence -->
+        <div class="meeting-notes-view" id="meetingNotesView" style="display: none;" aria-label="Meeting notes for coach">
+            <div class="meeting-notes-header">
+                <button class="btn btn-secondary" onclick="closeMeetingNotes()" aria-label="Back to coaches">
+                    &larr; Back to Coaches
+                </button>
+                <h2 id="meetingNotesTitle">Meeting Notes</h2>
+            </div>
+            <div class="meeting-notes-content">
+                <div class="meeting-notes-info">
+                    <span class="meeting-notes-label">Consultation notes for:</span>
+                    <span class="meeting-notes-coach-name" id="meetingNotesCoachName"></span>
+                </div>
+                <div class="form-group">
+                    <label for="meetingNotesText">Notes</label>
+                    <textarea
+                        id="meetingNotesText"
+                        class="meeting-notes-textarea"
+                        placeholder="Enter your meeting notes here...
+
+- Key discussion points
+- Action items
+- Follow-up questions
+- Impressions and takeaways"
+                        aria-label="Meeting notes text area"
+                    ></textarea>
+                </div>
+                <div class="meeting-notes-actions">
+                    <span class="meeting-notes-status" id="meetingNotesStatus"></span>
+                    <button class="btn btn-primary" onclick="saveMeetingNotes()">Save Notes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Smart Import Modal -->
+    <div class="modal-overlay" id="importModal" role="dialog" aria-modal="true" aria-labelledby="importModalTitle">
+        <div class="modal wide">
+            <div class="modal-header">
+                <h2 id="importModalTitle">Smart Import</h2>
+                <button class="modal-close" onclick="closeImportModal()" aria-label="Close modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="importText">Paste your emails, calendar invites, or notes below</label>
+                    <textarea id="importText" class="large" placeholder="Paste email threads, calendar invites, job descriptions, or any text containing job/interview information...
+
+Example:
+Subject: Interview Confirmation - Software Engineer at TechCorp
+Hi Jacob, We'd like to schedule your technical interview for Thursday, January 23rd at 2:00 PM EST...
+
+Or:
+Meeting with Career Coach Sarah Johnson
+Friday 1/24 at 10am
+$150/session
+sarah@coachingpro.com"></textarea>
+                    <div class="form-hint">The parser will extract companies, roles, dates, times, emails, and more.</div>
+                </div>
+                <div class="form-group">
+                    <label for="importType">What type of content is this?</label>
+                    <select id="importType">
+                        <option value="auto">Auto-detect</option>
+                        <option value="job">Job Application / Interview</option>
+                        <option value="coach">Job Coach Meeting</option>
+                    </select>
+                </div>
+                <div id="parseResults"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeImportModal()">Cancel</button>
+                <button class="btn btn-magic" onclick="parseImportText()">Parse &amp; Generate</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Job Modal -->
+    <div class="modal-overlay" id="jobModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add New Job</h2>
+                <button class="modal-close" onclick="closeModal()" aria-label="Close modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="jobForm" onsubmit="event.preventDefault(); saveJob();">
+                    <input type="hidden" id="jobId">
+                    <div class="form-group">
+                        <label for="company">Company Name *</label>
+                        <input type="text" id="company" required aria-required="true">
+                    </div>
+                    <div class="form-group">
+                        <label for="role">Role/Title *</label>
+                        <input type="text" id="role" required aria-required="true">
+                    </div>
+                    <div class="form-group">
+                        <label for="companyWebsite">Company Website *</label>
+                        <input type="url" id="companyWebsite" required aria-required="true" placeholder="e.g., https://company.com">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="address">Address *</label>
+                            <input type="text" id="address" required aria-required="true" placeholder="e.g., 123 Main St, New York, NY">
+                        </div>
+                        <div class="form-group">
+                            <label for="salary">Salary Range</label>
+                            <input type="text" id="salary" placeholder="e.g., $80k-$100k">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dateApplied">Application Date</label>
+                            <input type="date" id="dateApplied">
+                        </div>
+                        <div class="form-group">
+                            <label for="stage">Stage</label>
+                            <select id="stage">
+                                <option value="pipeline">Company Pipeline</option>
+                                <option value="applied">Applied</option>
+                                <option value="interview">Interview Set</option>
+                                <option value="final">Final Round</option>
+                                <option value="offer">Offer</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="interviewDate">Interview Date</label>
+                            <input type="date" id="interviewDate">
+                        </div>
+                        <div class="form-group">
+                            <label for="interviewTime">Interview Time</label>
+                            <input type="time" id="interviewTime">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="calendarEventUrl">Calendar Event URL</label>
+                        <input type="url" id="calendarEventUrl" placeholder="Paste Outlook event link here">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="contactName">Contact Name</label>
+                            <input type="text" id="contactName" placeholder="Recruiter/Hiring Manager">
+                        </div>
+                        <div class="form-group">
+                            <label for="contactInfo">Contact Email/Phone</label>
+                            <input type="text" id="contactInfo">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="tags">Tags (comma-separated)</label>
+                        <input type="text" id="tags" placeholder="e.g., Tech Sales, SDR, Remote">
+                    </div>
+                    <div class="form-group">
+                        <label for="notes">Notes</label>
+                        <textarea id="notes" placeholder="Add any notes..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Tasks/Todos</label>
+                        <div class="tasks-list" id="tasksList"></div>
+                        <div class="add-task">
+                            <input type="text" id="newTask" placeholder="Add a task..." aria-label="New task">
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="addTask()">Add</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" id="deleteJobBtn" onclick="deleteJobFromModal()" style="display: none;">Delete Job</button>
+                <div class="modal-footer-right">
+                    <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="saveJob()">Save Job</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Coach Modal -->
+    <div class="modal-overlay" id="coachModal" role="dialog" aria-modal="true" aria-labelledby="coachModalTitle">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="coachModalTitle">Add Job Coach</h2>
+                <button class="modal-close" onclick="closeCoachModal()" aria-label="Close modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="coachForm" onsubmit="event.preventDefault(); saveCoach();">
+                    <input type="hidden" id="coachId">
+                    <div class="form-group">
+                        <label for="coachName">Coach Name *</label>
+                        <input type="text" id="coachName" required aria-required="true">
+                    </div>
+                    <div class="form-group">
+                        <label for="coachSpecialty">Specialty</label>
+                        <input type="text" id="coachSpecialty" placeholder="e.g., Tech Sales, Executive Coaching">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="coachPrice">Price/Rate</label>
+                            <input type="text" id="coachPrice" placeholder="e.g., $150/hr">
+                        </div>
+                        <div class="form-group">
+                            <label for="coachRating">Rating (1-5)</label>
+                            <select id="coachRating">
+                                <option value="">Select</option>
+                                <option value="5">5 stars</option>
+                                <option value="4">4 stars</option>
+                                <option value="3">3 stars</option>
+                                <option value="2">2 stars</option>
+                                <option value="1">1 star</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="coachEmail">Email</label>
+                            <input type="email" id="coachEmail">
+                        </div>
+                        <div class="form-group">
+                            <label for="coachPhone">Phone</label>
+                            <input type="text" id="coachPhone">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="coachWebsite">Website/LinkedIn</label>
+                        <input type="text" id="coachWebsite">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="coachMeetingDate">Meeting Date</label>
+                            <input type="date" id="coachMeetingDate">
+                        </div>
+                        <div class="form-group">
+                            <label for="coachMeetingTime">Meeting Time</label>
+                            <input type="time" id="coachMeetingTime">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="coachCalendarUrl">Calendar Event URL</label>
+                        <input type="url" id="coachCalendarUrl" placeholder="Paste Outlook event link here">
+                    </div>
+                    <div class="form-group">
+                        <label for="coachStatus">Status</label>
+                        <select id="coachStatus">
+                            <option value="researching">Researching</option>
+                            <option value="contacted">Contacted</option>
+                            <option value="consulting">In Consultation</option>
+                            <option value="hired">Hired</option>
+                            <option value="declined">Declined</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="coachNotes">Notes</label>
+                        <textarea id="coachNotes"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeCoachModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveCoach()">Save Coach</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" id="confirmModal" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmMessage">
+        <div class="modal" style="max-width: 400px;">
+            <div class="modal-body">
+                <div class="confirm-dialog">
+                    <h3 id="confirmTitle">Confirm Action</h3>
+                    <p id="confirmMessage">Are you sure?</p>
+                    <div class="btn-group">
+                        <button class="btn btn-secondary" onclick="closeConfirmModal()">Cancel</button>
+                        <button class="btn btn-danger" onclick="confirmAction()">Confirm</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
