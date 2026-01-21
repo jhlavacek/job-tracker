@@ -1707,6 +1707,21 @@ body.view-mode .job-notes-empty {
     display: none;
 }
 
+/* Readonly notes display (view mode) */
+.job-notes-display-readonly {
+    font-size: 13px;
+    color: var(--text-secondary);
+    white-space: pre-wrap;
+    padding: 8px 0;
+}
+
+/* Readonly task checkbox (view mode) */
+.task-checkbox-readonly {
+    color: var(--color-accent);
+    margin-right: 8px;
+    font-size: 14px;
+}
+
 body.view-mode .job-card {
     cursor: default;
 }

@@ -414,31 +414,58 @@ function createJobCard(job) {
 
     // Build expandable section (notes + tasks)
     const isExpanded = expandedCards.has(job.id);
-    const notesDisplay = job.notes
-        ? `<div class="job-notes-display" onclick="editJobNotes('${job.id}')">${escapeHtml(job.notes)}</div>`
-        : `<div class="job-notes-empty" onclick="editJobNotes('${job.id}')">Click to add notes...</div>`;
+
+    // In view mode: show notes as plain text, no edit functionality
+    // In edit mode: show clickable notes with edit capability
+    let notesDisplay;
+    let notesEditSection = '';
+
+    if (isViewMode) {
+        // View mode: plain text, no onclick, no edit section
+        notesDisplay = job.notes
+            ? `<div class="job-notes-display-readonly">${escapeHtml(job.notes)}</div>`
+            : '';
+    } else {
+        // Edit mode: clickable notes with edit capability
+        notesDisplay = job.notes
+            ? `<div class="job-notes-display" onclick="editJobNotes('${job.id}')">${escapeHtml(job.notes)}</div>`
+            : `<div class="job-notes-empty" onclick="editJobNotes('${job.id}')">Click to add notes...</div>`;
+        notesEditSection = `
+            <div class="job-notes-edit" style="display: none;">
+                <textarea class="job-notes-textarea" placeholder="Add notes...">${escapeHtml(job.notes || '')}</textarea>
+                <div class="job-notes-actions">
+                    <button class="btn-save-notes" onclick="saveJobNotes('${job.id}')">Save</button>
+                    <button class="btn-cancel-notes" onclick="cancelEditNotes('${job.id}')">Cancel</button>
+                </div>
+            </div>
+        `;
+    }
+
+    // Tasks: in view mode, show as text only; in edit mode, show checkboxes
+    const tasksHtml = job.tasks?.length ? `<div class="job-tasks">${job.tasks.map((t, i) => {
+        if (isViewMode) {
+            return `<div class="job-task ${t.completed ? 'completed' : ''}">
+                <span class="task-checkbox-readonly">${t.completed ? '✓' : '○'}</span>
+                <span>${escapeHtml(t.text)}</span>
+            </div>`;
+        } else {
+            return `<div class="job-task ${t.completed ? 'completed' : ''}">
+                <input type="checkbox" ${t.completed ? 'checked' : ''}
+                       onchange="toggleTask('${job.id}',${i},this.checked)"
+                       aria-label="Mark task as ${t.completed ? 'incomplete' : 'complete'}">
+                <span>${escapeHtml(t.text)}</span>
+            </div>`;
+        }
+    }).join('')}</div>` : '';
 
     const expanded = `
         <button class="expand-btn" onclick="toggleExpand(this, '${job.id}')" aria-expanded="${isExpanded}">${isExpanded ? 'Show less ▲' : 'Show more ▼'}</button>
         <div class="job-expanded ${isExpanded ? 'show' : ''}">
             <div class="job-notes-section" data-job-id="${job.id}">
                 ${notesDisplay}
-                <div class="job-notes-edit" style="display: none;">
-                    <textarea class="job-notes-textarea" placeholder="Add notes...">${escapeHtml(job.notes || '')}</textarea>
-                    <div class="job-notes-actions">
-                        <button class="btn-save-notes" onclick="saveJobNotes('${job.id}')">Save</button>
-                        <button class="btn-cancel-notes" onclick="cancelEditNotes('${job.id}')">Cancel</button>
-                    </div>
-                </div>
+                ${notesEditSection}
             </div>
-            ${job.tasks?.length ? `<div class="job-tasks">${job.tasks.map((t, i) => `
-                <div class="job-task ${t.completed ? 'completed' : ''}">
-                    <input type="checkbox" ${t.completed ? 'checked' : ''}
-                           onchange="toggleTask('${job.id}',${i},this.checked)"
-                           aria-label="Mark task as ${t.completed ? 'incomplete' : 'complete'}">
-                    <span>${escapeHtml(t.text)}</span>
-                </div>
-            `).join('')}</div>` : ''}
+            ${tasksHtml}
         </div>
     `;
 
