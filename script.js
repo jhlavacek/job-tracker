@@ -118,13 +118,50 @@ async function loadDataFromFile() {
 
 /**
  * Applies view mode restrictions (hides edit controls, disables interactions).
+ * Removes all interactive elements after rendering.
  */
 function applyViewMode() {
     document.body.classList.add('view-mode');
 
-    // Explicitly hide header action buttons (Add Job, Export, etc.)
+    // Hide header action buttons (Add Job, Export, etc.)
     const headerActions = document.querySelector('.header-actions');
     if (headerActions) headerActions.style.display = 'none';
+
+    // Remove all coach meeting click functionality
+    document.querySelectorAll('.coach-meeting-clickable').forEach(el => {
+        el.onclick = null;
+        el.removeAttribute('onclick');
+        el.style.cursor = 'default';
+        // Remove the hint text
+        const hint = el.querySelector('.coach-meeting-hint');
+        if (hint) hint.remove();
+    });
+
+    // Remove all edit/delete buttons from coach cards
+    document.querySelectorAll('.coach-card .job-card-actions').forEach(el => el.remove());
+
+    // Remove all Meeting Notes buttons
+    document.querySelectorAll('.btn-meeting-notes').forEach(el => el.remove());
+
+    // Remove all job card action buttons
+    document.querySelectorAll('.job-card .job-card-actions').forEach(el => el.remove());
+
+    // Disable all notes editing
+    document.querySelectorAll('.job-notes-display, .job-notes-empty').forEach(el => {
+        el.onclick = null;
+        el.removeAttribute('onclick');
+        el.style.cursor = 'default';
+    });
+
+    // Remove notes edit sections
+    document.querySelectorAll('.job-notes-edit').forEach(el => el.remove());
+
+    // Disable all task checkboxes
+    document.querySelectorAll('.job-task input[type="checkbox"]').forEach(el => {
+        el.disabled = true;
+        el.onclick = null;
+        el.onchange = null;
+    });
 }
 
 // ============================================
