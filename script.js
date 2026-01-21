@@ -121,6 +121,10 @@ async function loadDataFromFile() {
  */
 function applyViewMode() {
     document.body.classList.add('view-mode');
+
+    // Explicitly hide header action buttons (Add Job, Export, etc.)
+    const headerActions = document.querySelector('.header-actions');
+    if (headerActions) headerActions.style.display = 'none';
 }
 
 // ============================================
@@ -933,30 +937,52 @@ function createCoachCard(coach) {
     if (coach.email) details.push(`📧 ${escapeHtml(coach.email)}`);
     if (coach.phone) details.push(`📱 ${escapeHtml(coach.phone)}`);
 
-    // Upcoming Meeting element - clickable to open Outlook calendar
-    // We store meetingDate (YYYY-MM-DD) and meetingTime (HH:MM) as data attributes
-    // so the click handler can build the Outlook calendar URL without parsing display text
-    const meeting = hasMeeting ? `
-        <button class="coach-meeting coach-meeting-clickable"
-                onclick="openOutlookCalendar('${coach.meetingDate}', '${coach.meetingTime || ''}')"
-                data-meeting-date="${coach.meetingDate}"
-                data-meeting-time="${coach.meetingTime || ''}"
-                aria-label="Open meeting in Outlook calendar"
-                title="Click to open in Outlook Calendar">
-            <div class="coach-meeting-label">Upcoming Meeting</div>
-            <div class="coach-meeting-datetime">
-                ${formatDateShort(coach.meetingDate)} ${coach.meetingTime ? formatTime(coach.meetingTime) : ''}
-            </div>
-            <div class="coach-meeting-hint">Click to open in Outlook</div>
-        </button>
-    ` : '';
+    // Upcoming Meeting element
+    // View mode: display only (no click), Edit mode: clickable to open Outlook
+    let meeting = '';
+    if (hasMeeting) {
+        if (isViewMode) {
+            // View mode: just show the meeting info, no click handler
+            meeting = `
+                <div class="coach-meeting coach-meeting-readonly">
+                    <div class="coach-meeting-label">Upcoming Meeting</div>
+                    <div class="coach-meeting-datetime">
+                        ${formatDateShort(coach.meetingDate)} ${coach.meetingTime ? formatTime(coach.meetingTime) : ''}
+                    </div>
+                </div>
+            `;
+        } else {
+            // Edit mode: clickable button to open Outlook
+            meeting = `
+                <button class="coach-meeting coach-meeting-clickable"
+                        onclick="openOutlookCalendar('${coach.meetingDate}', '${coach.meetingTime || ''}')"
+                        data-meeting-date="${coach.meetingDate}"
+                        data-meeting-time="${coach.meetingTime || ''}"
+                        aria-label="Open meeting in Outlook calendar"
+                        title="Click to open in Outlook Calendar">
+                    <div class="coach-meeting-label">Upcoming Meeting</div>
+                    <div class="coach-meeting-datetime">
+                        ${formatDateShort(coach.meetingDate)} ${coach.meetingTime ? formatTime(coach.meetingTime) : ''}
+                    </div>
+                    <div class="coach-meeting-hint">Click to open in Outlook</div>
+                </button>
+            `;
+        }
+    }
 
-    // Meeting Notes button - opens dedicated notes view for this coach
-    // The coach.id is passed to openMeetingNotes for candidate-to-notes mapping
-    const meetingNotesBtn = `
+    // Meeting Notes button - only show in edit mode
+    const meetingNotesBtn = isViewMode ? '' : `
         <button class="btn btn-meeting-notes" onclick="openMeetingNotes('${coach.id}')" aria-label="Meeting notes for ${coach.name}">
             📝 Meeting Notes
         </button>
+    `;
+
+    // Edit/delete buttons - only show in edit mode
+    const coachActions = isViewMode ? '' : `
+        <div class="job-card-actions">
+            <button onclick="openEditCoachModal('${coach.id}')" aria-label="Edit ${coach.name}">✏️</button>
+            <button class="delete" onclick="confirmDeleteCoach('${coach.id}')" aria-label="Delete ${coach.name}">🗑️</button>
+        </div>
     `;
 
     return `
@@ -966,10 +992,7 @@ function createCoachCard(coach) {
                     <span class="coach-name">${escapeHtml(coach.name)}</span>
                     ${stars ? `<span class="coach-rating">${stars}</span>` : ''}
                 </div>
-                <div class="job-card-actions">
-                    <button onclick="openEditCoachModal('${coach.id}')" aria-label="Edit ${coach.name}">✏️</button>
-                    <button class="delete" onclick="confirmDeleteCoach('${coach.id}')" aria-label="Delete ${coach.name}">🗑️</button>
-                </div>
+                ${coachActions}
             </div>
             ${coach.specialty ? `<div class="coach-specialty">${escapeHtml(coach.specialty)}</div>` : ''}
             <span class="coach-status ${coach.status}">${statusLabels[coach.status]}</span>

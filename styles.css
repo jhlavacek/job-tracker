@@ -1722,6 +1722,15 @@ body.view-mode .job-notes-empty {
     font-size: 14px;
 }
 
+/* Readonly meeting display (view mode) */
+.coach-meeting-readonly {
+    background: var(--color-accent-dim);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    padding: 12px;
+    margin: 12px 0;
+}
+
 body.view-mode .job-card {
     cursor: default;
 }
