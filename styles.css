@@ -1689,7 +1689,8 @@ body.view-mode .coach-card-header .job-card-actions,
 body.view-mode .job-notes-edit,
 body.view-mode .job-notes-actions,
 body.view-mode .btn-save-notes,
-body.view-mode .btn-cancel-notes {
+body.view-mode .btn-cancel-notes,
+body.view-mode .coach-header .btn-primary {
     display: none !important;
 }
 
