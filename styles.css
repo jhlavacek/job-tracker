@@ -1675,3 +1675,36 @@ body {
         outline: none;
     }
 }
+
+/* --------------------------------------------
+   View Mode (GitHub Pages - Read Only)
+   Hides all edit controls for visitors
+   -------------------------------------------- */
+body.view-mode .header-actions,
+body.view-mode .job-card-actions,
+body.view-mode .task-item button,
+body.view-mode .btn-meeting-notes,
+body.view-mode .coach-card .delete,
+body.view-mode .coach-card-header .job-card-actions {
+    display: none !important;
+}
+
+body.view-mode .job-card {
+    cursor: default;
+}
+
+body.view-mode .job-card[draggable="true"] {
+    cursor: default;
+}
+
+/* Add a subtle banner indicating view mode */
+body.view-mode::before {
+    content: "View Only Mode - Data updated by Jacob";
+    display: block;
+    background: linear-gradient(90deg, var(--color-accent), #9333ea);
+    color: white;
+    text-align: center;
+    padding: 8px;
+    font-size: 13px;
+    font-weight: 500;
+}

@@ -1,0 +1,73 @@
+{
+  "jobs": [
+    {
+      "id": "compound-planning-sdr-001",
+      "company": "Compound Planning",
+      "role": "Sales Development Representative (SDR)",
+      "salary": "$50k-$70k base + commission",
+      "dateApplied": "2026-01-17",
+      "stage": "applied",
+      "contactName": "",
+      "contactInfo": "careers@compoundplanning.com",
+      "tags": [
+        "SDR",
+        "Fintech",
+        "Wealth Management",
+        "Remote",
+        "Tech Sales"
+      ],
+      "notes": "Compound Planning is a digital family office for tech professionals. Y Combinator backed (2019). Manages $2.5B+ AUM.",
+      "tasks": [
+        {
+          "text": "Research company culture",
+          "completed": true
+        },
+        {
+          "text": "Tailor resume for fintech",
+          "completed": true
+        },
+        {
+          "text": "Submit application",
+          "completed": true
+        }
+      ],
+      "interviewDate": "",
+      "interviewTime": "",
+      "address": "115 Broadway, 5th Floor, New York, NY 10006",
+      "careerWebsite": "https://www.compoundplanning.com/careers",
+      "companyWebsite": "https://www.compoundplanning.com"
+    }
+  ],
+  "coaches": [
+    {
+      "id": "mkimqutldfxctskpzwj",
+      "name": "Jacob Hlavacek and Mattie Stremic Coaching Consultation",
+      "specialty": "",
+      "price": "",
+      "rating": null,
+      "email": "hello@bettercareer.org",
+      "phone": "5271596975",
+      "website": "",
+      "meetingDate": "2026-01-19",
+      "meetingTime": "12:00",
+      "status": "consulting",
+      "notes": "Monday, January 19, 2026\n \nEvent Name: Schedule Your Coaching Consultation\n👋 Let's work together to grow your career and achieve your goals. Schedule your free consultation call with us!\n\n\nOn this call, you're going to:\n\n1. Break down the biggest challenge that's preventing you from achieving your job search or career goals\n2. Gain clarity on how 1:1 coaching can help you achieve your goals\n\n\nWe look forward to meeting with you!\n\nMattie & Yuji\n\n\nNote: While we offer consultation calls to assess your potential fit for",
+      "calendarUrl": "https://us06web.zoom.us/j/5271596975?omn=82814927638"
+    },
+    {
+      "id": "mklqkgo0tiprz2ct63h",
+      "name": "SDR 1-on-1 Coaching Program - Jack",
+      "specialty": "SDR/BDR",
+      "price": "",
+      "rating": null,
+      "email": "jack.sword.advisory@gmail.com",
+      "phone": "973-727-2800",
+      "website": "",
+      "meetingDate": "2026-01-24",
+      "meetingTime": "11:00",
+      "status": "consulting",
+      "notes": "Hi Mattie and Jack, \n\nMattie, it was a pleasure meeting you today. As discussed, I will be in touch with you shortly after I meet with Jack. Thank you for your introduction. \n\nJack, my name is Jacob. I just booked some time to meet with you on Saturday morning at 11am CST. I look forward to meeting you. \n\nThanks again for all of your help, I do appreciate your time. \n\nJacob Hlavacek\njwhlavacek@outlook.com\n973-727-2800\n\n\nFrom: Jack Knight <jack.sword.advisory@gmail.com>\nDate: Monday, January 19,",
+      "calendarUrl": ""
+    }
+  ]
+}

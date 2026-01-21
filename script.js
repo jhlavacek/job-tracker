@@ -34,6 +34,9 @@ const JOB_STAGES = ['pipeline', 'applied', 'interview', 'final', 'offer'];
 // Track which job cards are expanded (persists across re-renders)
 const expandedCards = new Set();
 
+// View mode: true when running on GitHub Pages (read-only for visitors)
+let isViewMode = false;
+
 // Stage display labels
 const STAGE_LABELS = {
     pipeline: 'Company Pipeline',
@@ -74,13 +77,50 @@ const defaultJobs = [
 
 /**
  * Initialize the application on page load.
- * Loads data from localStorage and starts the countdown timer.
+ * Detects if running on GitHub Pages (view mode) or locally (edit mode).
+ * Loads data from localStorage (local) or data.json (GitHub Pages).
  */
-function init() {
-    loadData();
+async function init() {
+    // Detect if running on GitHub Pages
+    isViewMode = window.location.hostname.includes('github.io');
+
+    if (isViewMode) {
+        // Load from data.json file for GitHub Pages visitors
+        await loadDataFromFile();
+        applyViewMode();
+    } else {
+        // Load from localStorage for local editing
+        loadData();
+    }
+
     updateCountdown();
     // Update countdown every minute
     setInterval(updateCountdown, 60000);
+}
+
+/**
+ * Loads data from data.json file (used on GitHub Pages).
+ */
+async function loadDataFromFile() {
+    try {
+        const response = await fetch('data.json');
+        const data = await response.json();
+        jobs = data.jobs || [];
+        coaches = data.coaches || [];
+        renderAll();
+    } catch (error) {
+        console.error('Failed to load data.json:', error);
+        jobs = [];
+        coaches = [];
+        renderAll();
+    }
+}
+
+/**
+ * Applies view mode restrictions (hides edit controls, disables interactions).
+ */
+function applyViewMode() {
+    document.body.classList.add('view-mode');
 }
 
 // ============================================
