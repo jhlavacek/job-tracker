@@ -127,6 +127,13 @@ function applyViewMode() {
     const headerActions = document.querySelector('.header-actions');
     if (headerActions) headerActions.style.display = 'none';
 
+    // Hide the Add Coach button in the coach tab
+    const coachHeader = document.querySelector('.coach-header');
+    if (coachHeader) {
+        const addCoachBtn = coachHeader.querySelector('.btn-primary');
+        if (addCoachBtn) addCoachBtn.style.display = 'none';
+    }
+
     // Remove all coach meeting click functionality
     document.querySelectorAll('.coach-meeting-clickable').forEach(el => {
         el.onclick = null;
