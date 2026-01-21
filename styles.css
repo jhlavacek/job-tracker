@@ -1685,8 +1685,24 @@ body.view-mode .job-card-actions,
 body.view-mode .task-item button,
 body.view-mode .btn-meeting-notes,
 body.view-mode .coach-card .delete,
-body.view-mode .coach-card-header .job-card-actions {
+body.view-mode .coach-card-header .job-card-actions,
+body.view-mode .job-notes-edit,
+body.view-mode .job-notes-actions,
+body.view-mode .btn-save-notes,
+body.view-mode .btn-cancel-notes {
     display: none !important;
+}
+
+/* Disable click-to-edit on notes in view mode */
+body.view-mode .job-notes-display,
+body.view-mode .job-notes-empty {
+    pointer-events: none;
+    cursor: default;
+}
+
+/* Hide task checkboxes in view mode */
+body.view-mode .job-task input[type="checkbox"] {
+    pointer-events: none;
 }
 
 body.view-mode .job-card {
