@@ -1693,16 +1693,18 @@ body.view-mode .btn-cancel-notes {
     display: none !important;
 }
 
-/* Disable click-to-edit on notes in view mode */
+/* Disable editing interactions in view mode */
 body.view-mode .job-notes-display,
-body.view-mode .job-notes-empty {
+body.view-mode .job-notes-empty,
+body.view-mode .job-notes-textarea,
+body.view-mode .job-task input[type="checkbox"] {
     pointer-events: none;
     cursor: default;
 }
 
-/* Hide task checkboxes in view mode */
-body.view-mode .job-task input[type="checkbox"] {
-    pointer-events: none;
+/* Remove "click to add" hint in view mode */
+body.view-mode .job-notes-empty {
+    display: none;
 }
 
 body.view-mode .job-card {

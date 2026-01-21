@@ -516,6 +516,7 @@ function toggleExpand(btn, jobId) {
  * @param {string} jobId - The job's ID
  */
 function editJobNotes(jobId) {
+    if (isViewMode) return; // Block editing in view mode
     const section = document.querySelector(`.job-notes-section[data-job-id="${jobId}"]`);
     if (!section) return;
 
@@ -532,6 +533,7 @@ function editJobNotes(jobId) {
  * @param {string} jobId - The job's ID
  */
 function saveJobNotes(jobId) {
+    if (isViewMode) return; // Block saving in view mode
     const section = document.querySelector(`.job-notes-section[data-job-id="${jobId}"]`);
     if (!section) return;
 
@@ -590,6 +592,7 @@ function cancelEditNotes(jobId) {
  * @param {boolean} completed - New completed status
  */
 function toggleTask(jobId, idx, completed) {
+    if (isViewMode) return; // Block task toggling in view mode
     const job = jobs.find(j => j.id === jobId);
     if (job?.tasks?.[idx]) {
         job.tasks[idx].completed = completed;
