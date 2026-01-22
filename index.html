@@ -46,12 +46,12 @@
 
     <!-- Tab Navigation -->
     <nav class="tabs" role="tablist" aria-label="Main navigation">
-        <button class="tab-btn active" onclick="switchTab('jobs')" role="tab" aria-selected="true" aria-controls="tab-jobs">Job Applications</button>
-        <button class="tab-btn" onclick="switchTab('coach')" role="tab" aria-selected="false" aria-controls="tab-coach">Job Coach</button>
+        <button class="tab-btn active" id="btn-tab-jobs" onclick="switchTab('jobs')" role="tab" aria-selected="true" aria-controls="tab-jobs">Job Applications</button>
+        <button class="tab-btn" id="btn-tab-coach" onclick="switchTab('coach')" role="tab" aria-selected="false" aria-controls="tab-coach">Job Coach</button>
     </nav>
 
     <!-- Jobs Tab -->
-    <div class="tab-content active" id="tab-jobs" role="tabpanel" aria-labelledby="tab-jobs">
+    <div class="tab-content active" id="tab-jobs" role="tabpanel" aria-labelledby="btn-tab-jobs">
         <!-- Statistics Dashboard -->
         <section class="stats" id="stats" aria-label="Application statistics">
             <div class="stat-card">
@@ -130,7 +130,7 @@
     </div>
 
     <!-- Job Coach Tab -->
-    <div class="tab-content" id="tab-coach" role="tabpanel" aria-labelledby="tab-coach">
+    <div class="tab-content" id="tab-coach" role="tabpanel" aria-labelledby="btn-tab-coach">
         <!-- Main Coach Grid View -->
         <div class="coach-container" id="coachMainView">
             <div class="coach-header">
