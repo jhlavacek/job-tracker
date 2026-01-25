@@ -402,10 +402,11 @@ function renderThisWeek() {
         const dateStr = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
         const timeStr = item.time ? formatTime(item.time) : '';
 
+        const displayTime = timeStr ? ` at ${timeStr}` : '';
         return `
             <div class="week-item ${item.type}">
                 <div class="week-item-header">
-                    <span class="week-item-date">${dateStr} ${timeStr}</span>
+                    <span class="week-item-date">${dateStr}${displayTime}</span>
                     <span class="week-item-type">${item.type === 'job' ? 'Interview' : 'Coach Meeting'}</span>
                 </div>
                 <div class="week-item-title">${escapeHtml(item.title)}</div>
