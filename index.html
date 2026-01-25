@@ -38,11 +38,14 @@
         <h1>Job Tracker</h1>
         <div class="header-actions">
             <button class="btn btn-magic" onclick="openImportModal()">Smart Import</button>
+            <button class="btn btn-secondary btn-sm" onclick="triggerFileImport()">Import</button>
             <button class="btn btn-secondary btn-sm" onclick="exportData()">Export</button>
             <button class="btn btn-secondary btn-sm" onclick="confirmClearAll()">Clear All</button>
             <button class="btn btn-primary" id="mainAddBtn" onclick="openAddModal()">+ Add Job</button>
         </div>
     </header>
+    <!-- Hidden file input for importing data -->
+    <input type="file" id="fileImportInput" accept=".json" style="display: none;" onchange="handleFileImport(event)">
 
     <!-- Tab Navigation -->
     <nav class="tabs" role="tablist" aria-label="Main navigation">
@@ -323,7 +326,7 @@ sarah@coachingpro.com"></textarea>
 
     <!-- Coach Modal -->
     <div class="modal-overlay" id="coachModal" role="dialog" aria-modal="true" aria-labelledby="coachModalTitle">
-        <div class="modal">
+        <div class="modal wide">
             <div class="modal-header">
                 <h2 id="coachModalTitle">Add Job Coach</h2>
                 <button class="modal-close" onclick="closeCoachModal()" aria-label="Close modal">&times;</button>
@@ -331,31 +334,20 @@ sarah@coachingpro.com"></textarea>
             <div class="modal-body">
                 <form id="coachForm" onsubmit="event.preventDefault(); saveCoach();">
                     <input type="hidden" id="coachId">
-                    <div class="form-group">
-                        <label for="coachName">Coach Name *</label>
-                        <input type="text" id="coachName" required aria-required="true">
-                    </div>
-                    <div class="form-group">
-                        <label for="coachSpecialty">Specialty</label>
-                        <input type="text" id="coachSpecialty" placeholder="e.g., Tech Sales, Executive Coaching">
-                    </div>
+
+                    <!-- Basic Info -->
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="coachPrice">Price/Rate</label>
-                            <input type="text" id="coachPrice" placeholder="e.g., $150/hr">
+                            <label for="coachName">Coach Name *</label>
+                            <input type="text" id="coachName" required aria-required="true">
                         </div>
                         <div class="form-group">
-                            <label for="coachRating">Rating (1-5)</label>
-                            <select id="coachRating">
-                                <option value="">Select</option>
-                                <option value="5">5 stars</option>
-                                <option value="4">4 stars</option>
-                                <option value="3">3 stars</option>
-                                <option value="2">2 stars</option>
-                                <option value="1">1 star</option>
-                            </select>
+                            <label for="coachSpecialty">Specialty</label>
+                            <input type="text" id="coachSpecialty" placeholder="e.g., SDR/BDR, AE, Tech Sales">
                         </div>
                     </div>
+
+                    <!-- Contact -->
                     <div class="form-row">
                         <div class="form-group">
                             <label for="coachEmail">Email</label>
@@ -366,10 +358,8 @@ sarah@coachingpro.com"></textarea>
                             <input type="text" id="coachPhone">
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label for="coachWebsite">Website/LinkedIn</label>
-                        <input type="text" id="coachWebsite">
-                    </div>
+
+                    <!-- Meeting -->
                     <div class="form-row">
                         <div class="form-group">
                             <label for="coachMeetingDate">Meeting Date</label>
@@ -380,29 +370,62 @@ sarah@coachingpro.com"></textarea>
                             <input type="time" id="coachMeetingTime">
                         </div>
                     </div>
+
+                    <!-- Pricing -->
                     <div class="form-group">
-                        <label for="coachCalendarUrl">Calendar Event URL</label>
-                        <input type="url" id="coachCalendarUrl" placeholder="Paste Outlook event link here">
+                        <label for="coachPricing">Pricing</label>
+                        <textarea id="coachPricing" placeholder="e.g., $4k upfront + $4k after placement&#10;3-month program included"></textarea>
                     </div>
+
+                    <!-- What's Included -->
                     <div class="form-group">
-                        <label for="coachStatus">Status</label>
-                        <select id="coachStatus">
-                            <option value="researching">Researching</option>
-                            <option value="contacted">Contacted</option>
-                            <option value="consulting">In Consultation</option>
-                            <option value="hired">Hired</option>
-                            <option value="declined">Declined</option>
-                        </select>
+                        <label for="coachWhatsIncluded">What's Included</label>
+                        <textarea id="coachWhatsIncluded" placeholder="e.g., Interview prep, Resume review, Mock calls, Job hunt strategy"></textarea>
                     </div>
+
+                    <!-- Score -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="coachScore">My Score (1-10)</label>
+                            <select id="coachScore">
+                                <option value="">Not scored</option>
+                                <option value="10">10 - Perfect fit</option>
+                                <option value="9">9</option>
+                                <option value="8">8</option>
+                                <option value="7">7</option>
+                                <option value="6">6</option>
+                                <option value="5">5 - Average</option>
+                                <option value="4">4</option>
+                                <option value="3">3</option>
+                                <option value="2">2</option>
+                                <option value="1">1 - Not a fit</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="coachWebsite">Website/LinkedIn</label>
+                            <input type="text" id="coachWebsite">
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
                     <div class="form-group">
                         <label for="coachNotes">Notes</label>
-                        <textarea id="coachNotes"></textarea>
+                        <textarea id="coachNotes" placeholder="General notes about this coach..."></textarea>
                     </div>
+
+                    <!-- Hidden fields for legacy compatibility -->
+                    <input type="hidden" id="coachStatus" value="consulting">
+                    <input type="hidden" id="coachCalendarUrl">
+                    <input type="hidden" id="coachPrice">
+                    <input type="hidden" id="coachRating">
                 </form>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeCoachModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="saveCoach()">Save Coach</button>
+                <button class="btn btn-danger" id="deleteCoachBtn" onclick="deleteCoachFromModal()" style="display: none;">Delete</button>
+                <div class="modal-footer-right">
+                    <span class="modal-save-indicator" id="coachSaveIndicator"></span>
+                    <button class="btn btn-secondary" onclick="closeCoachModal()">Close</button>
+                </div>
             </div>
         </div>
     </div>

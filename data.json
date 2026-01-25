@@ -41,33 +41,114 @@
   "coaches": [
     {
       "id": "mkimqutldfxctskpzwj",
-      "name": "Jacob Hlavacek and Mattie Stremic Coaching Consultation",
-      "specialty": "",
+      "name": "Mattie Stremic",
+      "specialty": "AE Coach",
       "price": "",
       "rating": null,
       "email": "hello@bettercareer.org",
-      "phone": "5271596975",
+      "phone": "527-159-6975",
       "website": "",
       "meetingDate": "2026-01-19",
       "meetingTime": "12:00",
       "status": "consulting",
-      "notes": "Monday, January 19, 2026\n \nEvent Name: Schedule Your Coaching Consultation\n👋 Let's work together to grow your career and achieve your goals. Schedule your free consultation call with us!\n\n\nOn this call, you're going to:\n\n1. Break down the biggest challenge that's preventing you from achieving your job search or career goals\n2. Gain clarity on how 1:1 coaching can help you achieve your goals\n\n\nWe look forward to meeting with you!\n\nMattie & Yuji\n\n\nNote: While we offer consultation calls to assess your potential fit for",
-      "calendarUrl": "https://us06web.zoom.us/j/5271596975?omn=82814927638"
+      "notes": "Monday, January 19, 2026\n\n1. Break down the biggest challenge that's preventing you from achieving your job search or career goals\n2. Gain clarity on how 1:1 coaching can help you achieve your goals",
+      "calendarUrl": "https://us06web.zoom.us/j/5271596975?omn=82814927638",
+      "meetingSet": true,
+      "timeline": [
+        {
+          "date": "2026-01-25",
+          "text": "✗ Declined coach"
+        },
+        {
+          "date": "2026-01-25",
+          "text": "✓ Scored"
+        },
+        {
+          "date": "2026-01-25",
+          "text": "✗ Scored"
+        },
+        {
+          "date": "2026-01-25",
+          "text": "✓ Scored"
+        },
+        {
+          "date": "2026-01-25",
+          "text": "✓ Meeting Completed"
+        },
+        {
+          "date": "2026-01-25",
+          "text": "✓ Meeting Set"
+        }
+      ],
+      "meetingCompleted": true,
+      "scored": true,
+      "pricing": "4k Upfront and 4k after hired. 8k total\n3-month program",
+      "whatsIncluded": "Interview prep, resume review, mock interview.",
+      "score": 7,
+      "decision": "declined"
     },
     {
       "id": "mklqkgo0tiprz2ct63h",
-      "name": "SDR 1-on-1 Coaching Program - Jack",
-      "specialty": "SDR/BDR",
+      "name": "Jack Knight",
+      "specialty": "SDR/BDR Coach",
       "price": "",
       "rating": null,
       "email": "jack.sword.advisory@gmail.com",
-      "phone": "973-727-2800",
+      "phone": "571-552-5511",
       "website": "",
       "meetingDate": "2026-01-24",
       "meetingTime": "11:00",
       "status": "consulting",
-      "notes": "Meeting with Jack, SDR/BDR focus. \n\nGoing to compare him with Mattie AE focus. \n\nFrom: Jack Knight <jack.sword.advisory@gmail.com>\nDate: Monday, January 19,",
-      "calendarUrl": ""
+      "notes": "Meeting with Jack, SDR/BDR focus. \n\nGreat fit but too expensive.",
+      "calendarUrl": "",
+      "meetingSet": true,
+      "timeline": [
+        {
+          "date": "2026-01-25",
+          "text": "✗ Declined coach"
+        },
+        {
+          "date": "2026-01-25",
+          "text": "✓ Scored"
+        },
+        {
+          "date": "2026-01-25",
+          "text": "✓ Meeting Completed"
+        },
+        {
+          "date": "2026-01-25",
+          "text": "✓ Meeting Set"
+        }
+      ],
+      "meetingCompleted": true,
+      "scored": true,
+      "pricing": "$5,200 - all in cost\nPayment Plan Affirm - Spots my payments until I get a job, accrues interest",
+      "whatsIncluded": "Resume/LinkedIn Review, 1v1 coaching, access to Apollo for contacting hiring managers, mock interviews, referrals.",
+      "score": 9,
+      "decision": "declined"
+    },
+    {
+      "name": "Sameer Jauhar",
+      "specialty": "SDR/BDR Coach",
+      "email": "sameer@techsalesmentors.com",
+      "phone": "",
+      "website": "Tech Sales Mentors",
+      "meetingDate": "2026-01-26",
+      "meetingTime": "",
+      "pricing": "",
+      "whatsIncluded": "",
+      "score": null,
+      "notes": "",
+      "id": "mku6rb5sxrsvkgvuiw",
+      "meetingSet": false,
+      "meetingCompleted": false,
+      "scored": false,
+      "timeline": [
+        {
+          "date": "2026-01-25",
+          "text": "Coach added"
+        }
+      ]
     }
   ],
   "meetingNotes": {

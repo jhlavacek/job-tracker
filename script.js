@@ -177,6 +177,7 @@ function applyViewMode() {
         el.onclick = null;
         el.onchange = null;
     });
+
 }
 
 // ============================================
@@ -250,17 +251,25 @@ function loadData() {
 
 /**
  * Saves job data to localStorage and re-renders the UI.
+ * @param {string} [toastMessage] - Optional message to show in toast
  */
-function saveData() {
+function saveData(toastMessage) {
     localStorage.setItem('jobTrackerData', JSON.stringify(jobs));
+    if (toastMessage) {
+        showSaveToast(toastMessage);
+    }
     renderAll();
 }
 
 /**
  * Saves coach data to localStorage and re-renders the UI.
+ * @param {string} [toastMessage] - Optional message to show in toast
  */
-function saveCoachData() {
+function saveCoachData(toastMessage) {
     localStorage.setItem('jobTrackerCoaches', JSON.stringify(coaches));
+    if (toastMessage) {
+        showSaveToast(toastMessage);
+    }
     renderAll();
 }
 
@@ -531,12 +540,12 @@ function createJobCard(job) {
 
     // "← Move Back" button - disabled if at first stage (pipeline)
     const moveBackBtn = prevStage
-        ? `<button class="btn-move-stage btn-move-back" onclick="confirmMoveStageBack('${job.id}')" title="Move back to ${STAGE_LABELS[prevStage]}" aria-label="Move ${job.company} back to ${STAGE_LABELS[prevStage]}">←</button>`
+        ? `<button class="btn-move-stage btn-move-back" onclick="moveStageBack('${job.id}')" title="Move back to ${STAGE_LABELS[prevStage]}" aria-label="Move ${job.company} back to ${STAGE_LABELS[prevStage]}">←</button>`
         : `<button class="btn-move-stage btn-move-back" disabled title="Already at first stage" aria-label="Already at pipeline stage">←</button>`;
 
     // "Move Forward →" button - disabled if at final stage (offer)
     const moveForwardBtn = nextStage
-        ? `<button class="btn-move-stage btn-move-forward" onclick="confirmMoveStage('${job.id}')" title="Move to ${STAGE_LABELS[nextStage]}" aria-label="Move ${job.company} to ${STAGE_LABELS[nextStage]}">→</button>`
+        ? `<button class="btn-move-stage btn-move-forward" onclick="moveStageForward('${job.id}')" title="Move to ${STAGE_LABELS[nextStage]}" aria-label="Move ${job.company} to ${STAGE_LABELS[nextStage]}">→</button>`
         : `<button class="btn-move-stage btn-move-forward" disabled title="Already at final stage" aria-label="Already at offer stage">✓</button>`;
 
     // Company name - clickable to open company website in popup window
@@ -627,6 +636,7 @@ function saveJobNotes(jobId) {
     if (job) {
         job.notes = notes;
         localStorage.setItem('jobTrackerData', JSON.stringify(jobs));
+        showSaveToast('Notes saved');
     }
 
     // Update display
@@ -729,51 +739,80 @@ function getPreviousStage(currentStage) {
 }
 
 /**
- * Shows confirmation modal for moving a job to the next stage.
+ * Moves a job to the next stage immediately (no confirmation).
+ * Saves to localStorage right away for data persistence.
  * @param {string} jobId - The ID of the job to move
  */
-function confirmMoveStage(jobId) {
-    const job = jobs.find(j => j.id === jobId);
-    if (!job) return;
+function moveStageForward(jobId) {
+    const jobIndex = jobs.findIndex(j => j.id === jobId);
+    if (jobIndex === -1) return;
 
+    const job = jobs[jobIndex];
     const nextStage = getNextStage(job.stage);
     if (!nextStage) return; // Already at final stage
 
-    const currentLabel = STAGE_LABELS[job.stage];
-    const nextLabel = STAGE_LABELS[nextStage];
+    // Update stage directly in the array
+    jobs[jobIndex].stage = nextStage;
 
-    openConfirmModal(
-        'Move Forward',
-        `Move "${job.company}" from ${currentLabel} to ${nextLabel}?`,
-        () => {
-            job.stage = nextStage;
-            saveData();
-        }
-    );
+    // Save immediately to localStorage
+    localStorage.setItem('jobTrackerData', JSON.stringify(jobs));
+
+    // Show save confirmation
+    showSaveToast(`Moved to ${STAGE_LABELS[nextStage]}`);
+
+    // Re-render the board
+    renderAll();
 }
 
 /**
- * Shows soft warning modal for moving a job back to the previous stage.
+ * Moves a job back to the previous stage immediately (no confirmation).
+ * Saves to localStorage right away for data persistence.
  * @param {string} jobId - The ID of the job to move back
  */
-function confirmMoveStageBack(jobId) {
-    const job = jobs.find(j => j.id === jobId);
-    if (!job) return;
+function moveStageBack(jobId) {
+    const jobIndex = jobs.findIndex(j => j.id === jobId);
+    if (jobIndex === -1) return;
 
+    const job = jobs[jobIndex];
     const prevStage = getPreviousStage(job.stage);
     if (!prevStage) return; // Already at first stage
 
-    const currentLabel = STAGE_LABELS[job.stage];
-    const prevLabel = STAGE_LABELS[prevStage];
+    // Update stage directly in the array
+    jobs[jobIndex].stage = prevStage;
 
-    openConfirmModal(
-        'Move Back',
-        `Move "${job.company}" back from ${currentLabel} to ${prevLabel}?`,
-        () => {
-            job.stage = prevStage;
-            saveData();
-        }
-    );
+    // Save immediately to localStorage
+    localStorage.setItem('jobTrackerData', JSON.stringify(jobs));
+
+    // Show save confirmation
+    showSaveToast(`Moved back to ${STAGE_LABELS[prevStage]}`);
+
+    // Re-render the board
+    renderAll();
+}
+
+/**
+ * Shows a brief toast notification confirming the save.
+ * @param {string} message - The message to display
+ */
+function showSaveToast(message) {
+    // Remove any existing toast
+    const existingToast = document.querySelector('.save-toast');
+    if (existingToast) existingToast.remove();
+
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = 'save-toast';
+    toast.textContent = message + ' ✓';
+    document.body.appendChild(toast);
+
+    // Trigger animation
+    setTimeout(() => toast.classList.add('show'), 10);
+
+    // Remove after 2 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 2000);
 }
 
 /**
@@ -908,13 +947,14 @@ function saveJob() {
         if (idx !== -1) {
             jobs[idx] = { ...jobs[idx], ...data };
         }
+        saveData('Job updated');
     } else {
         // Create new job
         data.id = generateId();
         jobs.push(data);
+        saveData('Job added');
     }
 
-    saveData();
     closeModal();
 }
 
@@ -967,94 +1007,333 @@ function renderCoaches() {
 }
 
 /**
- * Creates the HTML for a coach card.
+ * Creates the HTML for a coach card with structured sections.
  * @param {Object} coach - The coach object
  * @returns {string} HTML string for the coach card
  */
 function createCoachCard(coach) {
-    const statusLabels = {
-        researching: 'Researching',
-        contacted: 'Contacted',
-        consulting: 'In Consultation',
-        hired: 'Hired',
-        declined: 'Declined'
-    };
-
-    const stars = coach.rating ? '★'.repeat(coach.rating) + '☆'.repeat(5 - coach.rating) : '';
     const hasMeeting = coach.meetingDate && new Date(coach.meetingDate) >= new Date();
 
-    // Build details
-    const details = [];
-    if (coach.price) details.push(`💰 ${escapeHtml(coach.price)}`);
-    if (coach.email) details.push(`📧 ${escapeHtml(coach.email)}`);
-    if (coach.phone) details.push(`📱 ${escapeHtml(coach.phone)}`);
-
-    // Upcoming Meeting element
-    // View mode: display only (no click), Edit mode: clickable to open Outlook
-    let meeting = '';
-    if (hasMeeting) {
-        if (isViewMode) {
-            // View mode: just show the meeting info, no click handler
-            meeting = `
-                <div class="coach-meeting coach-meeting-readonly">
-                    <div class="coach-meeting-label">Upcoming Meeting</div>
-                    <div class="coach-meeting-datetime">
-                        ${formatDateShort(coach.meetingDate)} ${coach.meetingTime ? formatTime(coach.meetingTime) : ''}
-                    </div>
-                </div>
-            `;
-        } else {
-            // Edit mode: clickable button to open Outlook
-            meeting = `
-                <button class="coach-meeting coach-meeting-clickable"
-                        onclick="openOutlookCalendar('${coach.meetingDate}', '${coach.meetingTime || ''}')"
-                        data-meeting-date="${coach.meetingDate}"
-                        data-meeting-time="${coach.meetingTime || ''}"
-                        aria-label="Open meeting in Outlook calendar"
-                        title="Click to open in Outlook Calendar">
-                    <div class="coach-meeting-label">Upcoming Meeting</div>
-                    <div class="coach-meeting-datetime">
-                        ${formatDateShort(coach.meetingDate)} ${coach.meetingTime ? formatTime(coach.meetingTime) : ''}
-                    </div>
-                    <div class="coach-meeting-hint">Click to open in Outlook</div>
-                </button>
-            `;
-        }
-    }
-
-    // Meeting Notes button - only show in edit mode
-    const meetingNotesBtn = isViewMode ? '' : `
-        <button class="btn btn-meeting-notes" onclick="openMeetingNotes('${coach.id}')" aria-label="Meeting notes for ${coach.name}">
-            📝 Meeting Notes
-        </button>
-    `;
+    // Score badge (1-10)
+    const scoreBadge = coach.score
+        ? `<span class="coach-score-badge">${coach.score}/10</span>`
+        : `<span class="coach-score-badge empty">--/10</span>`;
 
     // Edit/delete buttons - only show in edit mode
     const coachActions = isViewMode ? '' : `
-        <div class="job-card-actions">
+        <div class="coach-card-actions">
             <button onclick="openEditCoachModal('${coach.id}')" aria-label="Edit ${coach.name}">✏️</button>
             <button class="delete" onclick="confirmDeleteCoach('${coach.id}')" aria-label="Delete ${coach.name}">🗑️</button>
         </div>
     `;
 
-    return `
-        <div class="coach-card ${hasMeeting ? 'has-meeting' : ''}" data-id="${coach.id}">
-            <div class="coach-card-header">
-                <div>
-                    <span class="coach-name">${escapeHtml(coach.name)}</span>
-                    ${stars ? `<span class="coach-rating">${stars}</span>` : ''}
-                </div>
-                ${coachActions}
+    // Contact info - each on its own line
+    const contactInfo = [];
+    if (coach.email) contactInfo.push(`<div class="coach-contact-item">📧 ${escapeHtml(coach.email)}</div>`);
+    if (coach.phone) contactInfo.push(`<div class="coach-contact-item">📱 ${escapeHtml(coach.phone)}</div>`);
+    const contactLine = contactInfo.length ? `<div class="coach-contact-block">${contactInfo.join('')}</div>` : '';
+
+    // Upcoming Meeting banner
+    let meetingBanner = '';
+    if (hasMeeting) {
+        const meetingClickable = isViewMode ? '' : `onclick="openOutlookCalendar('${coach.meetingDate}', '${coach.meetingTime || ''}')"`;
+        const meetingClass = isViewMode ? 'coach-meeting-banner' : 'coach-meeting-banner clickable';
+        meetingBanner = `
+            <div class="${meetingClass}" ${meetingClickable}>
+                <span class="meeting-icon">📅</span>
+                <span class="meeting-text">Meeting: ${formatDateShort(coach.meetingDate)} ${coach.meetingTime ? formatTime(coach.meetingTime) : ''}</span>
+                ${isViewMode ? '' : '<span class="meeting-hint">Click to open calendar</span>'}
             </div>
-            ${coach.specialty ? `<div class="coach-specialty">${escapeHtml(coach.specialty)}</div>` : ''}
-            <span class="coach-status ${coach.status}">${statusLabels[coach.status]}</span>
-            ${details.length ? `<div class="coach-details">${details.join('<br>')}</div>` : ''}
-            ${meeting}
-            ${coach.notes ? `<div class="coach-notes">${escapeHtml(coach.notes)}</div>` : ''}
+        `;
+    }
+
+    // Status checkboxes
+    const meetingSet = coach.meetingSet || false;
+    const meetingCompleted = coach.meetingCompleted || false;
+    const scored = coach.scored || false;
+
+    const statusCheckboxes = isViewMode ? `
+        <div class="coach-status-checkboxes">
+            <span class="status-check ${meetingSet ? 'checked' : ''}">${meetingSet ? '☑' : '☐'} Meeting Set</span>
+            <span class="status-check ${meetingCompleted ? 'checked' : ''}">${meetingCompleted ? '☑' : '☐'} Meeting Done</span>
+            <span class="status-check ${scored ? 'checked' : ''}">${scored ? '☑' : '☐'} Scored</span>
+        </div>
+    ` : `
+        <div class="coach-status-checkboxes">
+            <label class="status-check">
+                <input type="checkbox" ${meetingSet ? 'checked' : ''} onchange="updateCoachStatus('${coach.id}', 'meetingSet', this.checked)">
+                Meeting Set
+            </label>
+            <label class="status-check">
+                <input type="checkbox" ${meetingCompleted ? 'checked' : ''} onchange="updateCoachStatus('${coach.id}', 'meetingCompleted', this.checked)">
+                Meeting Done
+            </label>
+            <label class="status-check">
+                <input type="checkbox" ${scored ? 'checked' : ''} onchange="updateCoachStatus('${coach.id}', 'scored', this.checked)">
+                Scored
+            </label>
+        </div>
+    `;
+
+    // Decision section (Accept/Decline)
+    const decision = coach.decision; // 'accepted', 'declined', or undefined
+    let decisionSection = '';
+    if (decision === 'accepted') {
+        decisionSection = `
+            <div class="coach-section-label">DECISION</div>
+            <div class="coach-decision-row">
+                <div class="coach-decision-made accepted">✓ Accepted</div>
+                ${isViewMode ? '' : `<button class="btn-change-decision" onclick="changeCoachDecision('${coach.id}')">Change</button>`}
+            </div>
+        `;
+    } else if (decision === 'declined') {
+        decisionSection = `
+            <div class="coach-section-label">DECISION</div>
+            <div class="coach-decision-row">
+                <div class="coach-decision-made declined">✗ Declined</div>
+                ${isViewMode ? '' : `<button class="btn-change-decision" onclick="changeCoachDecision('${coach.id}')">Change</button>`}
+            </div>
+        `;
+    } else if (!isViewMode) {
+        decisionSection = `
+            <div class="coach-section-label">DECISION</div>
+            <div class="coach-decision-buttons">
+                <button class="btn-decision btn-accept" onclick="setCoachDecision('${coach.id}', 'accepted')">✓ Accept Coach</button>
+                <button class="btn-decision btn-decline" onclick="setCoachDecision('${coach.id}', 'declined')">✗ Decline Coach</button>
+            </div>
+        `;
+    }
+
+    // Decision badge for header
+    let decisionBadge = '';
+    if (decision === 'accepted') {
+        decisionBadge = '<span class="coach-decision-badge accepted">ACCEPTED</span>';
+    } else if (decision === 'declined') {
+        decisionBadge = '<span class="coach-decision-badge declined">DECLINED</span>';
+    } else {
+        decisionBadge = '<span class="coach-decision-badge pending">PENDING</span>';
+    }
+
+    // Timeline section
+    const timeline = coach.timeline || [];
+    const timelineHtml = timeline.length ? timeline.map(entry => `
+        <div class="timeline-entry">
+            <span class="timeline-date">${formatDateShort(entry.date)}</span>
+            <span class="timeline-text">${escapeHtml(entry.text)}</span>
+        </div>
+    `).join('') : '<div class="timeline-empty">No activity yet</div>';
+
+    const addTimelineBtn = isViewMode ? '' : `
+        <button class="btn-add-timeline" onclick="addTimelineEntry('${coach.id}')">+ Add Entry</button>
+    `;
+
+    // Meeting Notes button - always at bottom, only in edit mode
+    const meetingNotesBtn = isViewMode ? '' : `
+        <div class="coach-card-footer">
+            <button class="btn btn-meeting-notes" onclick="openMeetingNotes('${coach.id}')" aria-label="Meeting notes for ${coach.name}">
+                📝 Meeting Notes
+            </button>
+        </div>
+    `;
+
+    // Card classes
+    const cardClasses = ['coach-card'];
+    if (hasMeeting) cardClasses.push('has-meeting');
+    if (coach.decision === 'declined') cardClasses.push('is-declined');
+    if (coach.decision === 'accepted') cardClasses.push('is-accepted');
+
+    return `
+        <div class="${cardClasses.join(' ')}" data-id="${coach.id}">
+            <div class="coach-card-header">
+                <div class="coach-header-left">
+                    <span class="coach-name">${escapeHtml(coach.name)}</span>
+                    ${coach.specialty ? `<span class="coach-specialty">${escapeHtml(coach.specialty)}</span>` : ''}
+                </div>
+                <div class="coach-header-right">
+                    ${decisionBadge}
+                    ${scoreBadge}
+                    ${coachActions}
+                </div>
+            </div>
+
+            <div class="coach-contact-area">${contactLine}</div>
+
+            <div class="coach-section coach-section-pricing">
+                <div class="coach-section-label">PRICING</div>
+                <div class="coach-section-content">${coach.pricing ? escapeHtml(coach.pricing) : '<span class="empty-field">Not specified</span>'}</div>
+            </div>
+
+            <div class="coach-section coach-section-included">
+                <div class="coach-section-label">WHAT'S INCLUDED</div>
+                <div class="coach-section-content">${coach.whatsIncluded ? escapeHtml(coach.whatsIncluded) : '<span class="empty-field">Not specified</span>'}</div>
+            </div>
+
+            <div class="coach-section coach-section-status">
+                <div class="coach-section-label">STATUS</div>
+                ${statusCheckboxes}
+            </div>
+
+            <div class="coach-section coach-section-notes">
+                <div class="coach-section-label">NOTES</div>
+                <div class="coach-section-content">${coach.notes ? escapeHtml(coach.notes) : '<span class="empty-field">No notes</span>'}</div>
+            </div>
+
+            <div class="coach-section coach-section-decision">${decisionSection}</div>
+
+            <div class="coach-section coach-timeline">
+                <div class="coach-section-label timeline-header" onclick="toggleCoachTimeline('${coach.id}')">
+                    <span>▼ TIMELINE</span>
+                </div>
+                <div class="timeline-content" id="timeline-${coach.id}">
+                    ${timelineHtml}
+                    ${addTimelineBtn}
+                </div>
+            </div>
+
             ${meetingNotesBtn}
         </div>
     `;
 }
+
+/**
+ * Updates a coach's status checkbox and logs to timeline.
+ * @param {string} coachId - The coach ID
+ * @param {string} field - The field to update (meetingSet, meetingCompleted, scored)
+ * @param {boolean} value - The new value
+ */
+function updateCoachStatus(coachId, field, value) {
+    const coachIndex = coaches.findIndex(c => c.id === coachId);
+    if (coachIndex === -1) return;
+
+    const coach = coaches[coachIndex];
+    coach[field] = value;
+
+    // Add timeline entry
+    const fieldLabels = {
+        meetingSet: 'Meeting Set',
+        meetingCompleted: 'Meeting Completed',
+        scored: 'Scored'
+    };
+
+    if (!coach.timeline) coach.timeline = [];
+    coach.timeline.unshift({
+        date: new Date().toISOString().split('T')[0],
+        text: `${value ? '✓' : '✗'} ${fieldLabels[field]}`
+    });
+
+    // Save and show feedback
+    localStorage.setItem('jobTrackerCoaches', JSON.stringify(coaches));
+    showSaveToast('Status updated');
+    renderCoaches();
+}
+
+/**
+ * Sets the final decision for a coach (accepted or declined).
+ * @param {string} coachId - The coach ID
+ * @param {string} decision - 'accepted' or 'declined'
+ */
+function setCoachDecision(coachId, decision) {
+    const coachIndex = coaches.findIndex(c => c.id === coachId);
+    if (coachIndex === -1) return;
+
+    const coach = coaches[coachIndex];
+
+    // Confirm the decision
+    const actionText = decision === 'accepted' ? 'accept' : 'decline';
+    if (!confirm(`Are you sure you want to ${actionText} ${coach.name}?`)) {
+        return;
+    }
+
+    coach.decision = decision;
+
+    // Add timeline entry
+    if (!coach.timeline) coach.timeline = [];
+    coach.timeline.unshift({
+        date: new Date().toISOString().split('T')[0],
+        text: decision === 'accepted' ? '✓ Accepted coach' : '✗ Declined coach'
+    });
+
+    // Save and show feedback
+    localStorage.setItem('jobTrackerCoaches', JSON.stringify(coaches));
+    showSaveToast(decision === 'accepted' ? 'Coach accepted' : 'Coach declined');
+    renderCoaches();
+}
+
+/**
+ * Changes an existing decision for a coach.
+ * Requires a reason to be provided before the change is allowed.
+ * @param {string} coachId - The coach ID
+ */
+function changeCoachDecision(coachId) {
+    const coachIndex = coaches.findIndex(c => c.id === coachId);
+    if (coachIndex === -1) return;
+
+    const coach = coaches[coachIndex];
+    const currentDecision = coach.decision;
+    const newDecision = currentDecision === 'accepted' ? 'declined' : 'accepted';
+    const newDecisionText = newDecision === 'accepted' ? 'Accept' : 'Decline';
+
+    // Require a reason
+    const reason = prompt(`Why do you want to change from "${currentDecision}" to "${newDecision}"?\n\nPlease provide a reason:`);
+
+    if (!reason || !reason.trim()) {
+        alert('A reason is required to change the decision.');
+        return;
+    }
+
+    // Update decision
+    coach.decision = newDecision;
+
+    // Add timeline entry with reason
+    if (!coach.timeline) coach.timeline = [];
+    coach.timeline.unshift({
+        date: new Date().toISOString().split('T')[0],
+        text: `Decision changed to ${newDecision}: ${reason.trim()}`
+    });
+
+    // Save and show feedback
+    localStorage.setItem('jobTrackerCoaches', JSON.stringify(coaches));
+    showSaveToast(`Decision changed to ${newDecision}`);
+    renderCoaches();
+}
+
+/**
+ * Toggles the timeline section visibility.
+ * @param {string} coachId - The coach ID
+ */
+function toggleCoachTimeline(coachId) {
+    const timeline = document.getElementById(`timeline-${coachId}`);
+    if (timeline) {
+        timeline.classList.toggle('collapsed');
+    }
+}
+
+/**
+ * Adds a manual timeline entry for a coach.
+ * @param {string} coachId - The coach ID
+ */
+function addTimelineEntry(coachId) {
+    const text = prompt('Enter timeline note:');
+    if (!text || !text.trim()) return;
+
+    const coachIndex = coaches.findIndex(c => c.id === coachId);
+    if (coachIndex === -1) return;
+
+    const coach = coaches[coachIndex];
+    if (!coach.timeline) coach.timeline = [];
+
+    coach.timeline.unshift({
+        date: new Date().toISOString().split('T')[0],
+        text: text.trim()
+    });
+
+    localStorage.setItem('jobTrackerCoaches', JSON.stringify(coaches));
+    showSaveToast('Timeline entry added');
+    renderCoaches();
+}
+
+// Coach modal autosave timer
+let coachAutosaveTimer = null;
 
 /**
  * Opens the modal for adding a new coach.
@@ -1063,9 +1342,13 @@ function openCoachModal() {
     document.getElementById('coachModalTitle').textContent = 'Add Job Coach';
     document.getElementById('coachForm').reset();
     document.getElementById('coachId').value = '';
-    document.getElementById('coachStatus').value = 'researching';
+    document.getElementById('deleteCoachBtn').style.display = 'none';
+    document.getElementById('coachSaveIndicator').textContent = '';
     document.getElementById('coachModal').classList.add('show');
     document.getElementById('coachName').focus();
+
+    // Setup autosave for new coach (will create on first save)
+    setupCoachAutosave();
 }
 
 /**
@@ -1078,26 +1361,161 @@ function openEditCoachModal(coachId) {
 
     document.getElementById('coachModalTitle').textContent = 'Edit Job Coach';
     document.getElementById('coachId').value = coach.id;
+    document.getElementById('deleteCoachBtn').style.display = 'block';
+    document.getElementById('coachSaveIndicator').textContent = '';
+
+    // Basic info
     document.getElementById('coachName').value = coach.name;
     document.getElementById('coachSpecialty').value = coach.specialty || '';
-    document.getElementById('coachPrice').value = coach.price || '';
-    document.getElementById('coachRating').value = coach.rating || '';
     document.getElementById('coachEmail').value = coach.email || '';
     document.getElementById('coachPhone').value = coach.phone || '';
     document.getElementById('coachWebsite').value = coach.website || '';
+
+    // Meeting
     document.getElementById('coachMeetingDate').value = coach.meetingDate || '';
     document.getElementById('coachMeetingTime').value = coach.meetingTime || '';
-    document.getElementById('coachCalendarUrl').value = coach.calendarUrl || '';
-    document.getElementById('coachStatus').value = coach.status || 'researching';
+
+    // New structured fields
+    document.getElementById('coachPricing').value = coach.pricing || coach.price || '';
+    document.getElementById('coachWhatsIncluded').value = coach.whatsIncluded || '';
+    document.getElementById('coachScore').value = coach.score || '';
     document.getElementById('coachNotes').value = coach.notes || '';
+
     document.getElementById('coachModal').classList.add('show');
+
+    // Setup autosave
+    setupCoachAutosave();
+}
+
+/**
+ * Deletes a coach from within the modal.
+ */
+function deleteCoachFromModal() {
+    const coachId = document.getElementById('coachId').value;
+    if (!coachId) return;
+
+    const coach = coaches.find(c => c.id === coachId);
+    if (!coach) return;
+
+    if (confirm(`Delete "${coach.name}" from your coaches?`)) {
+        coaches = coaches.filter(c => c.id !== coachId);
+        deleteMeetingNotesFromStorage(coachId);
+        saveCoachData('Coach deleted');
+        closeCoachModal();
+    }
 }
 
 /**
  * Closes the coach modal.
  */
 function closeCoachModal() {
+    // Clear autosave timer
+    if (coachAutosaveTimer) {
+        clearTimeout(coachAutosaveTimer);
+        coachAutosaveTimer = null;
+    }
     document.getElementById('coachModal').classList.remove('show');
+}
+
+/**
+ * Sets up autosave listeners for all coach modal fields.
+ */
+function setupCoachAutosave() {
+    const fields = [
+        'coachName', 'coachSpecialty', 'coachEmail', 'coachPhone',
+        'coachWebsite', 'coachMeetingDate', 'coachMeetingTime',
+        'coachPricing', 'coachWhatsIncluded', 'coachScore', 'coachNotes'
+    ];
+
+    fields.forEach(fieldId => {
+        const el = document.getElementById(fieldId);
+        if (el) {
+            // Remove old listener to avoid duplicates
+            el.removeEventListener('input', triggerCoachAutosave);
+            el.removeEventListener('change', triggerCoachAutosave);
+            // Add new listeners
+            el.addEventListener('input', triggerCoachAutosave);
+            el.addEventListener('change', triggerCoachAutosave);
+        }
+    });
+}
+
+/**
+ * Triggers debounced autosave for coach modal.
+ */
+function triggerCoachAutosave() {
+    // Show "Saving..." indicator
+    const indicator = document.getElementById('coachSaveIndicator');
+    indicator.textContent = 'Saving...';
+    indicator.className = 'modal-save-indicator saving';
+
+    // Debounce - wait 500ms after last keystroke
+    if (coachAutosaveTimer) clearTimeout(coachAutosaveTimer);
+    coachAutosaveTimer = setTimeout(autosaveCoach, 500);
+}
+
+/**
+ * Autosaves the coach data from the modal without closing it.
+ */
+function autosaveCoach() {
+    const name = document.getElementById('coachName').value.trim();
+
+    // Don't save if no name yet
+    if (!name) {
+        document.getElementById('coachSaveIndicator').textContent = '';
+        return;
+    }
+
+    let coachId = document.getElementById('coachId').value;
+    const isNew = !coachId;
+
+    const data = {
+        name,
+        specialty: document.getElementById('coachSpecialty').value.trim(),
+        email: document.getElementById('coachEmail').value.trim(),
+        phone: document.getElementById('coachPhone').value.trim(),
+        website: document.getElementById('coachWebsite').value.trim(),
+        meetingDate: document.getElementById('coachMeetingDate').value,
+        meetingTime: document.getElementById('coachMeetingTime').value,
+        pricing: document.getElementById('coachPricing').value.trim(),
+        whatsIncluded: document.getElementById('coachWhatsIncluded').value.trim(),
+        score: document.getElementById('coachScore').value ? parseInt(document.getElementById('coachScore').value) : null,
+        notes: document.getElementById('coachNotes').value.trim()
+    };
+
+    if (isNew) {
+        // Create new coach
+        coachId = generateId();
+        data.id = coachId;
+        data.meetingSet = false;
+        data.meetingCompleted = false;
+        data.scored = false;
+        data.timeline = [{
+            date: new Date().toISOString().split('T')[0],
+            text: 'Coach added'
+        }];
+        coaches.push(data);
+        // Update the hidden ID field so subsequent saves update instead of creating
+        document.getElementById('coachId').value = coachId;
+        document.getElementById('deleteCoachBtn').style.display = 'block';
+    } else {
+        // Update existing coach
+        const idx = coaches.findIndex(c => c.id === coachId);
+        if (idx !== -1) {
+            coaches[idx] = { ...coaches[idx], ...data };
+        }
+    }
+
+    // Save to localStorage
+    localStorage.setItem('jobTrackerCoaches', JSON.stringify(coaches));
+
+    // Update indicator
+    const indicator = document.getElementById('coachSaveIndicator');
+    indicator.textContent = 'Saved ✓';
+    indicator.className = 'modal-save-indicator saved';
+
+    // Re-render board in background (without closing modal)
+    renderCoaches();
 }
 
 /**
@@ -1112,18 +1530,20 @@ function saveCoach() {
     }
 
     const coachId = document.getElementById('coachId').value;
+    const isNew = !coachId;
+
     const data = {
         name,
         specialty: document.getElementById('coachSpecialty').value.trim(),
-        price: document.getElementById('coachPrice').value.trim(),
-        rating: document.getElementById('coachRating').value ? parseInt(document.getElementById('coachRating').value) : null,
         email: document.getElementById('coachEmail').value.trim(),
         phone: document.getElementById('coachPhone').value.trim(),
         website: document.getElementById('coachWebsite').value.trim(),
         meetingDate: document.getElementById('coachMeetingDate').value,
         meetingTime: document.getElementById('coachMeetingTime').value,
-        calendarUrl: document.getElementById('coachCalendarUrl').value.trim(),
-        status: document.getElementById('coachStatus').value,
+        // New structured fields
+        pricing: document.getElementById('coachPricing').value.trim(),
+        whatsIncluded: document.getElementById('coachWhatsIncluded').value.trim(),
+        score: document.getElementById('coachScore').value ? parseInt(document.getElementById('coachScore').value) : null,
         notes: document.getElementById('coachNotes').value.trim()
     };
 
@@ -1132,12 +1552,22 @@ function saveCoach() {
         if (idx !== -1) {
             coaches[idx] = { ...coaches[idx], ...data };
         }
+        saveCoachData('Coach updated');
     } else {
         data.id = generateId();
+        // Initialize status checkboxes for new coaches
+        data.meetingSet = false;
+        data.meetingCompleted = false;
+        data.scored = false;
+        // Initialize timeline with creation entry
+        data.timeline = [{
+            date: new Date().toISOString().split('T')[0],
+            text: 'Coach added'
+        }];
         coaches.push(data);
+        saveCoachData('Coach added');
     }
 
-    saveCoachData();
     closeCoachModal();
 }
 
@@ -1795,6 +2225,96 @@ function exportData() {
     a.download = `job-tracker-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
+}
+
+// ============================================
+// Data Import
+// ============================================
+
+/**
+ * Triggers the hidden file input for importing data.
+ */
+function triggerFileImport() {
+    document.getElementById('fileImportInput').click();
+}
+
+/**
+ * Handles the file import when a file is selected.
+ * Reads the JSON file and restores all data to localStorage.
+ * @param {Event} event - The file input change event
+ */
+function handleFileImport(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.name.endsWith('.json')) {
+        alert('Please select a .json file');
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+
+            // Validate the data structure
+            if (!data.jobs && !data.coaches) {
+                alert('Invalid file format. Expected jobs and/or coaches data.');
+                return;
+            }
+
+            // Count what we're importing
+            const jobCount = data.jobs ? data.jobs.length : 0;
+            const coachCount = data.coaches ? data.coaches.length : 0;
+            const notesCount = data.meetingNotes ? Object.keys(data.meetingNotes).length : 0;
+
+            // Confirm import
+            const confirmMsg = `Import ${jobCount} jobs, ${coachCount} coaches, and ${notesCount} meeting notes?\n\nThis will replace your current data.`;
+            if (!confirm(confirmMsg)) {
+                return;
+            }
+
+            // Import jobs
+            if (data.jobs && Array.isArray(data.jobs)) {
+                jobs = data.jobs;
+                localStorage.setItem('jobTrackerData', JSON.stringify(jobs));
+            }
+
+            // Import coaches
+            if (data.coaches && Array.isArray(data.coaches)) {
+                coaches = data.coaches;
+                localStorage.setItem('jobTrackerCoaches', JSON.stringify(coaches));
+            }
+
+            // Import meeting notes
+            if (data.meetingNotes && typeof data.meetingNotes === 'object') {
+                Object.entries(data.meetingNotes).forEach(([coachId, notes]) => {
+                    localStorage.setItem(`meetingNotes_${coachId}`, notes);
+                });
+            }
+
+            // Show success and reload
+            showSaveToast('Data imported successfully');
+
+            // Re-render everything
+            renderAll();
+
+            // Reset the file input so the same file can be imported again if needed
+            event.target.value = '';
+
+        } catch (error) {
+            console.error('Import error:', error);
+            alert('Error reading file. Make sure it\'s a valid JSON file.');
+        }
+    };
+
+    reader.onerror = function() {
+        alert('Error reading file.');
+    };
+
+    reader.readAsText(file);
 }
 
 // ============================================

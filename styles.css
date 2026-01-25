@@ -1698,9 +1698,21 @@ body.view-mode .coach-header .btn-primary {
 body.view-mode .job-notes-display,
 body.view-mode .job-notes-empty,
 body.view-mode .job-notes-textarea,
-body.view-mode .job-task input[type="checkbox"] {
+body.view-mode .job-task input[type="checkbox"],
+body.view-mode .coach-status-checkboxes,
+body.view-mode .coach-decision-buttons,
+body.view-mode .btn-add-timeline,
+body.view-mode .btn-change-decision {
     pointer-events: none;
     cursor: default;
+}
+
+/* Hide edit-only elements in view mode */
+body.view-mode .coach-decision-buttons,
+body.view-mode .btn-add-timeline,
+body.view-mode .btn-change-decision,
+body.view-mode .coach-card-actions {
+    display: none !important;
 }
 
 /* Remove "click to add" hint in view mode */
@@ -1750,4 +1762,520 @@ body.view-mode::before {
     padding: 8px;
     font-size: 13px;
     font-weight: 500;
+}
+
+/* --------------------------------------------
+   Save Toast Notification
+   -------------------------------------------- */
+.save-toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: linear-gradient(135deg, var(--color-accent), #9333ea);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 4px 20px rgba(168, 85, 247, 0.4);
+    z-index: 10000;
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.save-toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+/* --------------------------------------------
+   Coach Card - Redesigned with Structured Sections
+   -------------------------------------------- */
+
+/* Card Layout - CSS Grid for alignment */
+.coach-card {
+    display: grid;
+    grid-template-rows:
+        80px      /* 1: header */
+        60px      /* 2: contact */
+        80px      /* 3: pricing */
+        110px     /* 4: whats included */
+        55px      /* 5: status */
+        130px     /* 6: notes */
+        75px      /* 7: decision */
+        1fr       /* 8: timeline */
+        auto;     /* 9: footer */
+    min-height: auto;
+}
+
+.coach-card-header { grid-row: 1; }
+.coach-contact-area { grid-row: 2; }
+.coach-section-pricing { grid-row: 3; }
+.coach-section-included { grid-row: 4; }
+.coach-section-status { grid-row: 5; }
+.coach-section-notes { grid-row: 6; }
+.coach-section-decision { grid-row: 7; }
+.coach-timeline { grid-row: 8; }
+.coach-card-footer { grid-row: 9; }
+
+.coach-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.coach-header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-height: 44px;
+    max-width: 180px;
+}
+
+.coach-header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.coach-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.coach-specialty {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Score Badge */
+.coach-score-badge {
+    background: linear-gradient(135deg, var(--color-accent), #9333ea);
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 20px;
+    white-space: nowrap;
+}
+
+.coach-score-badge.empty {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+}
+
+/* Card Actions */
+.coach-card-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.coach-card-actions button {
+    background: transparent;
+    border: none;
+    padding: 4px 8px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.coach-card-actions button:hover {
+    background: var(--bg-tertiary);
+}
+
+/* Contact Line */
+.coach-contact-line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+}
+
+.coach-contact-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Meeting Banner */
+.coach-meeting-banner {
+    background: var(--color-accent-dim);
+    border: 1px solid var(--color-accent);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.coach-meeting-banner.clickable {
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.coach-meeting-banner.clickable:hover {
+    background: var(--color-accent-subtle);
+    border-color: var(--color-accent-light);
+}
+
+.meeting-icon {
+    font-size: 18px;
+}
+
+.meeting-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.meeting-hint {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-left: auto;
+}
+
+/* Coach Sections */
+.coach-section {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding-bottom: 8px;
+}
+
+.coach-section-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-accent);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.coach-section-content {
+    font-size: 14px;
+    color: var(--text-primary);
+    line-height: 1.5;
+    white-space: pre-wrap;
+    overflow-y: auto;
+    flex: 1;
+}
+
+
+.coach-section-content .empty-field {
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+/* Status Checkboxes */
+.coach-status-checkboxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    min-height: 24px;
+}
+
+.status-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.status-check input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--color-accent);
+    cursor: pointer;
+}
+
+.status-check.checked {
+    color: var(--color-accent);
+}
+
+/* Timeline Section */
+.coach-timeline {
+    border-top: 1px solid var(--border-color);
+    padding-top: 12px;
+    margin-top: 8px;
+}
+
+.timeline-header {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    user-select: none;
+}
+
+.timeline-header:hover {
+    color: var(--color-accent);
+}
+
+.timeline-content {
+    margin-top: 10px;
+    padding-left: 8px;
+    border-left: 2px solid var(--border-color);
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.timeline-content.collapsed {
+    display: none;
+}
+
+.timeline-entry {
+    padding: 8px 0 8px 12px;
+    font-size: 13px;
+    display: flex;
+    gap: 10px;
+    border-bottom: 1px solid var(--bg-tertiary);
+}
+
+.timeline-entry:last-child {
+    border-bottom: none;
+}
+
+.timeline-date {
+    color: var(--text-secondary);
+    font-size: 12px;
+    white-space: nowrap;
+    min-width: 60px;
+}
+
+.timeline-text {
+    color: var(--text-primary);
+}
+
+.timeline-empty {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-style: italic;
+    padding: 8px 12px;
+}
+
+.btn-add-timeline {
+    background: transparent;
+    border: 1px dashed var(--border-color);
+    color: var(--text-secondary);
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    margin-top: 8px;
+    margin-left: 12px;
+    transition: all 0.2s;
+}
+
+.btn-add-timeline:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+/* Coach Card Footer (Meeting Notes button) */
+.coach-card-footer {
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+}
+
+.coach-card-footer .btn-meeting-notes {
+    width: 100%;
+    justify-content: center;
+}
+
+/* --------------------------------------------
+   Modal Autosave Indicator
+   -------------------------------------------- */
+.modal-save-indicator {
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 4px;
+    margin-right: 12px;
+    transition: all 0.2s ease;
+}
+
+.modal-save-indicator.saving {
+    color: var(--text-secondary);
+}
+
+.modal-save-indicator.saved {
+    color: #22c55e;
+    background: rgba(34, 197, 94, 0.1);
+}
+
+.modal-footer-right {
+    display: flex;
+    align-items: center;
+}
+
+/* Declined status - red styling */
+.status-check.declined {
+    color: var(--text-secondary);
+}
+
+.status-check.declined.checked {
+    color: #ef4444;
+}
+
+.status-check.declined input[type="checkbox"] {
+    accent-color: #ef4444;
+}
+
+/* --------------------------------------------
+   Coach Decision (Accept/Decline)
+   -------------------------------------------- */
+
+/* Decision Buttons */
+.coach-decision-buttons {
+    display: flex;
+    gap: 12px;
+    min-height: 36px;
+}
+
+.btn-decision {
+    flex: 1;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-accept {
+    background: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.btn-accept:hover {
+    background: rgba(34, 197, 94, 0.25);
+    border-color: #22c55e;
+}
+
+.btn-decline {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.btn-decline:hover {
+    background: rgba(239, 68, 68, 0.25);
+    border-color: #ef4444;
+}
+
+/* Decision Made Text */
+.coach-decision-made {
+    font-size: 14px;
+    font-weight: 600;
+    padding: 8px 12px;
+    border-radius: 6px;
+    display: inline-block;
+}
+
+.coach-decision-made.accepted {
+    background: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
+}
+
+.coach-decision-made.declined {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+}
+
+/* Decision Badge in Header */
+.coach-decision-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.coach-decision-badge.accepted {
+    background: #22c55e;
+    color: white;
+}
+
+.coach-decision-badge.declined {
+    background: #ef4444;
+    color: white;
+}
+
+.coach-decision-badge.pending {
+    background: #6b7280;
+    color: white;
+}
+
+/* Declined Card Styling - dimmed */
+.coach-card.is-declined {
+    opacity: 0.6;
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.coach-card.is-declined:hover {
+    opacity: 0.8;
+}
+
+/* Accepted Card Styling - subtle green border */
+.coach-card.is-accepted {
+    border-color: rgba(34, 197, 94, 0.4);
+}
+
+/* Contact info - vertical layout */
+.coach-contact-block {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+    min-height: 52px;
+}
+
+.coach-contact-block .coach-contact-item {
+    font-size: 13px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Decision row with change button */
+.coach-decision-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 36px;
+}
+
+.btn-change-decision {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-change-decision:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
 }
