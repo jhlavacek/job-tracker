@@ -77,18 +77,20 @@ const defaultJobs = [
 
 /**
  * Initialize the application on page load.
- * Loads data from localStorage, or from data.json on first visit.
+ * GitHub Pages visitors see read-only version. Local users can edit.
  */
 async function init() {
-    // Check if user has existing localStorage data
-    const hasLocalData = localStorage.getItem('jobTrackerData') || localStorage.getItem('jobTrackerCoaches');
+    // Detect if running on GitHub Pages (read-only for visitors)
+    const isGitHubPages = window.location.hostname.includes('github.io');
 
-    if (hasLocalData) {
-        // Load from localStorage (user's own data)
-        loadData();
-    } else {
-        // First visit - load starter data from data.json
+    if (isGitHubPages) {
+        // Load your data from data.json and make read-only
         await loadDataFromFile();
+        isViewMode = true;
+        applyViewMode();
+    } else {
+        // Local - load from localStorage for editing
+        loadData();
     }
 
     updateCountdown();
@@ -120,6 +122,13 @@ async function loadDataFromFile() {
         coaches = [];
         renderAll();
     }
+}
+
+/**
+ * Applies view mode - hides edit controls but keeps the same visual design.
+ */
+function applyViewMode() {
+    document.body.classList.add('view-mode');
 }
 
 // ============================================

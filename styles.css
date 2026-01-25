@@ -1677,6 +1677,41 @@ body {
 }
 
 /* --------------------------------------------
+   View Mode (GitHub Pages - Read Only)
+   Same visual design, but no editing allowed
+   -------------------------------------------- */
+
+/* Hide all edit/action buttons */
+body.view-mode .header-actions,
+body.view-mode .job-card-actions,
+body.view-mode .task-item button,
+body.view-mode .btn-meeting-notes,
+body.view-mode .coach-card-actions,
+body.view-mode .coach-decision-buttons,
+body.view-mode .btn-add-timeline,
+body.view-mode .btn-change-decision {
+    display: none !important;
+}
+
+/* Disable all interactive elements */
+body.view-mode .job-card,
+body.view-mode .job-notes-display,
+body.view-mode .job-notes-empty,
+body.view-mode .coach-status-checkboxes,
+body.view-mode .coach-meeting-banner,
+body.view-mode input,
+body.view-mode button,
+body.view-mode textarea {
+    pointer-events: none;
+    cursor: default;
+}
+
+/* Disable drag and drop */
+body.view-mode .job-card[draggable="true"] {
+    cursor: default;
+}
+
+/* --------------------------------------------
    Save Toast Notification
    -------------------------------------------- */
 .save-toast {
