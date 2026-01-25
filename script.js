@@ -703,6 +703,10 @@ function moveStageForward(jobId) {
     const nextStage = getNextStage(job.stage);
     if (!nextStage) return; // Already at final stage
 
+    // Show confirmation dialog
+    const confirmMove = confirm(`Move "${job.company}" from ${STAGE_LABELS[job.stage]} to ${STAGE_LABELS[nextStage]}?`);
+    if (!confirmMove) return;
+
     // Update stage directly in the array
     jobs[jobIndex].stage = nextStage;
 
@@ -728,6 +732,10 @@ function moveStageBack(jobId) {
     const job = jobs[jobIndex];
     const prevStage = getPreviousStage(job.stage);
     if (!prevStage) return; // Already at first stage
+
+    // Show confirmation dialog
+    const confirmMove = confirm(`Move "${job.company}" back from ${STAGE_LABELS[job.stage]} to ${STAGE_LABELS[prevStage]}?`);
+    if (!confirmMove) return;
 
     // Update stage directly in the array
     jobs[jobIndex].stage = prevStage;
